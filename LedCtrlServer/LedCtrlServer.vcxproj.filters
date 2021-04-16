@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="comm">
+      <UniqueIdentifier>{5e4543d2-7648-4611-b4ff-186ccfd534d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{6f1fc3b3-8176-4469-bde6-8e83a59852e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="http">
+      <UniqueIdentifier>{c7436fec-d398-4118-b596-055568b15551}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="config">
+      <UniqueIdentifier>{064edc7c-14e3-4e7f-991b-305d4bb5d670}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="trade">
+      <UniqueIdentifier>{1c0f85c8-b491-4787-8278-cecf6387c557}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json">
+      <UniqueIdentifier>{e0124fb6-368e-462a-b320-5fc8aee1ccb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices">
+      <UniqueIdentifier>{e8bf360a-6b61-4ce8-bb10-6395978fd96c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\励研">
+      <UniqueIdentifier>{3a219239-5ae7-404e-ae6e-8b231323606f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\诣阔">
+      <UniqueIdentifier>{d19e9509-071a-4bf6-92c3-87f0d7308079}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\仰邦">
+      <UniqueIdentifier>{89ae5f88-e2f7-4778-8e1c-3b6735248437}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\视展">
+      <UniqueIdentifier>{ae973066-b2e8-4096-91d8-cdc5c10295bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\仰邦\BX-5">
+      <UniqueIdentifier>{1b35667b-14f2-4a65-9c73-b731f057e770}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\视展\VSA">
+      <UniqueIdentifier>{672cbc83-5de4-46eb-bc7c-85ceb5d032ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\视展\VSD">
+      <UniqueIdentifier>{2ea5d81a-2d91-4376-9c20-924416fe6b06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\诣阔\eq2008">
+      <UniqueIdentifier>{c4bf38c2-a4a8-4a18-a0b5-674680994900}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\励研\cl3000">
+      <UniqueIdentifier>{1120fc80-ccce-4cd7-b3e0-d1dbdc0a67ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3des加解密">
+      <UniqueIdentifier>{de229a21-a284-4610-b043-585acb47419f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\励研\SCL2008">
+      <UniqueIdentifier>{1b137afa-e1b4-465a-8c4f-2982527c1069}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LedCtrlServer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LedCtrlServerDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\BasePack.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\BasePrint.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Client.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonFun.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUI.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommTbl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\DESTools.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\DLL.H">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\DLL_LOAD.H">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\FileOper.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Ftp.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ImageBase.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ImageDlg.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\InputLanguage.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\InterfaceReg.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\json.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LOG.H">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LOG2.H">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\MD5.H">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\MediaDevice.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Ping.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\PlayerCtrl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\RS232C.H">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sharememory.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TCPClient.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TCPServer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tinystr.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tinyxml.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\wav.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\http\HttpClient.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\trade\Trade.h">
+      <Filter>trade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\comm\comm.h">
+      <Filter>comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\comm\COMMFCN.h">
+      <Filter>comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\comm\commfun.h">
+      <Filter>comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\comm\CommonFun.h">
+      <Filter>comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\comm\DeviceStruct.h">
+      <Filter>comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\comm\KeyConfig.h">
+      <Filter>comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\comm\MsgConfig.h">
+      <Filter>comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Config\Config.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\json\json.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\VS\A\VSA.h">
+      <Filter>devices\视展\VSA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\VS\D\VSD.h">
+      <Filter>devices\视展\VSD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\BX\BX5\Onbon.h">
+      <Filter>devices\仰邦\BX-5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\EQ\eq2008\EQ2008_DataStruct.h">
+      <Filter>devices\诣阔\eq2008</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\EQ\eq2008\EQ2008_Dll.h">
+      <Filter>devices\诣阔\eq2008</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\CL\cl3000\MiniLED.h">
+      <Filter>devices\励研\cl3000</Filter>
+    </ClInclude>
+    <ClInclude Include="..\des-3\CommunicateInterface.h">
+      <Filter>3des加解密</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\BX\BX5\Obasic_types.h">
+      <Filter>devices\仰邦\BX-5</Filter>
+    </ClInclude>
+    <ClInclude Include="SCL2008.h">
+      <Filter>devices\励研\SCL2008</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\mythreadpool.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="LedCtrlServer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LedCtrlServerDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\http\HttpClient.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\trade\Trade.cpp">
+      <Filter>trade</Filter>
+    </ClCompile>
+    <ClCompile Include="..\comm\COMMFCN.cpp">
+      <Filter>comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\comm\commfun.cpp">
+      <Filter>comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\comm\KeyConfig.cpp">
+      <Filter>comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\comm\MsgConfig.cpp">
+      <Filter>comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Config\Config.cpp">
+      <Filter>config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\VS\A\VSA.cpp">
+      <Filter>devices\视展\VSA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\VS\D\VSD.cpp">
+      <Filter>devices\视展\VSD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\BX\BX5\Onbon.cpp">
+      <Filter>devices\仰邦\BX-5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\CL\cl3000\MiniLED.cpp">
+      <Filter>devices\励研\cl3000</Filter>
+    </ClCompile>
+    <ClCompile Include="SCL2008.cpp">
+      <Filter>devices\励研\SCL2008</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LedCtrlServer.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\LedCtrlServer.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\LedCtrlServer.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

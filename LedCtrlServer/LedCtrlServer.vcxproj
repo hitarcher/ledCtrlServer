@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{67D2C019-94B8-4606-B927-AC73C99E8E2E}</ProjectGuid>
+    <RootNamespace>LedCtrlServer</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <Keyword>MFCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140_xp</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>../bin/</OutDir>
+    <IncludePath>$(SolutionDir)devices\BX\BX5\;$(SolutionDir)LedCtrlServer\;$(SolutionDir)devices\CL\cl3000\;$(SolutionDir)devices\EQ\eq2008\;$(SolutionDir)trade\;$(SolutionDir)http\;$(SolutionDir)include\;$(SolutionDir)comm\;$(SolutionDir)Config\;$(SolutionDir)json\;$(SolutionDir)devices\VS\A;$(SolutionDir)devices\VS\D;$(SolutionDir)des-3\;$(SolutionDir)devices\CL\SCL2008\;./;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib\;./;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>../bin/</OutDir>
+    <IncludePath>$(SolutionDir)devices\BX\BX5\;$(SolutionDir)LedCtrlServer\;$(SolutionDir)devices\CL\cl3000\;$(SolutionDir)devices\EQ\eq2008\;$(SolutionDir)trade\;$(SolutionDir)http\;$(SolutionDir)include\;$(SolutionDir)comm\;$(SolutionDir)Config\;$(SolutionDir)json\;$(SolutionDir)devices\VS\A;$(SolutionDir)devices\VS\D;$(SolutionDir)des-3\;$(SolutionDir)devices\CL\SCL2008\;./;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib\;./;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>EQ2008_Dll.lib</AdditionalDependencies>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>EQ2008_Dll.lib</AdditionalDependencies>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\comm\comm.h" />
+    <ClInclude Include="..\comm\COMMFCN.h" />
+    <ClInclude Include="..\comm\commfun.h" />
+    <ClInclude Include="..\comm\CommonFun.h" />
+    <ClInclude Include="..\comm\DeviceStruct.h" />
+    <ClInclude Include="..\comm\KeyConfig.h" />
+    <ClInclude Include="..\comm\MsgConfig.h" />
+    <ClInclude Include="..\Config\Config.h" />
+    <ClInclude Include="..\des-3\CommunicateInterface.h" />
+    <ClInclude Include="..\devices\BX\BX5\Obasic_types.h" />
+    <ClInclude Include="..\devices\BX\BX5\Onbon.h" />
+    <ClInclude Include="..\devices\CL\cl3000\MiniLED.h" />
+    <ClInclude Include="..\devices\EQ\eq2008\EQ2008_DataStruct.h" />
+    <ClInclude Include="..\devices\EQ\eq2008\EQ2008_Dll.h" />
+    <ClInclude Include="..\devices\VS\A\VSA.h" />
+    <ClInclude Include="..\devices\VS\D\VSD.h" />
+    <ClInclude Include="..\http\HttpClient.h" />
+    <ClInclude Include="..\include\BasePack.h" />
+    <ClInclude Include="..\include\BasePrint.h" />
+    <ClInclude Include="..\include\Client.h" />
+    <ClInclude Include="..\include\CommonFun.h" />
+    <ClInclude Include="..\include\CommonUI.h" />
+    <ClInclude Include="..\include\CommTbl.h" />
+    <ClInclude Include="..\include\DESTools.h" />
+    <ClInclude Include="..\include\DLL.H" />
+    <ClInclude Include="..\include\DLL_LOAD.H" />
+    <ClInclude Include="..\include\FileOper.h" />
+    <ClInclude Include="..\include\Ftp.h" />
+    <ClInclude Include="..\include\ImageBase.h" />
+    <ClInclude Include="..\include\ImageDlg.h" />
+    <ClInclude Include="..\include\InputLanguage.h" />
+    <ClInclude Include="..\include\InterfaceReg.h" />
+    <ClInclude Include="..\include\json.hpp" />
+    <ClInclude Include="..\include\LOG.H" />
+    <ClInclude Include="..\include\LOG2.H" />
+    <ClInclude Include="..\include\MD5.H" />
+    <ClInclude Include="..\include\MediaDevice.h" />
+    <ClInclude Include="..\include\mythreadpool.h" />
+    <ClInclude Include="..\include\Ping.h" />
+    <ClInclude Include="..\include\PlayerCtrl.h" />
+    <ClInclude Include="..\include\RS232C.H" />
+    <ClInclude Include="..\include\sharememory.h" />
+    <ClInclude Include="..\include\TCPClient.h" />
+    <ClInclude Include="..\include\TCPServer.h" />
+    <ClInclude Include="..\include\tinystr.h" />
+    <ClInclude Include="..\include\tinyxml.h" />
+    <ClInclude Include="..\include\wav.h" />
+    <ClInclude Include="..\json\json.hpp" />
+    <ClInclude Include="..\trade\Trade.h" />
+    <ClInclude Include="LedCtrlServer.h" />
+    <ClInclude Include="LedCtrlServerDlg.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="SCL2008.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\comm\COMMFCN.cpp" />
+    <ClCompile Include="..\comm\commfun.cpp" />
+    <ClCompile Include="..\comm\KeyConfig.cpp" />
+    <ClCompile Include="..\comm\MsgConfig.cpp" />
+    <ClCompile Include="..\Config\Config.cpp" />
+    <ClCompile Include="..\devices\BX\BX5\Onbon.cpp" />
+    <ClCompile Include="..\devices\CL\cl3000\MiniLED.cpp" />
+    <ClCompile Include="..\devices\VS\A\VSA.cpp" />
+    <ClCompile Include="..\devices\VS\D\VSD.cpp" />
+    <ClCompile Include="..\http\HttpClient.cpp" />
+    <ClCompile Include="..\trade\Trade.cpp" />
+    <ClCompile Include="LedCtrlServer.cpp" />
+    <ClCompile Include="LedCtrlServerDlg.cpp" />
+    <ClCompile Include="SCL2008.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LedCtrlServer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\LedCtrlServer.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\LedCtrlServer.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="LedCtrlServer.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
