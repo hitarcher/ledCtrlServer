@@ -116,7 +116,7 @@ inline threadpool::~threadpool()
 /*edit by mingl*/
 inline size_t threadpool::get_workers_count()
 {
-	return workers.size();
+	return working_count;
 }
 
 inline size_t threadpool::get_tasksqueue_count()

@@ -164,6 +164,7 @@ void CLedCtrlServerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1, Tips);
+	DDX_Control(pDX, IDC_LIST2, m_list_queue);
 }
 
 BEGIN_MESSAGE_MAP(CLedCtrlServerDlg, CDialogEx)
@@ -209,6 +210,7 @@ BOOL CLedCtrlServerDlg::OnInitDialog()
 	pool_VSA = new threadpool(1);
 	pool_VSD = new threadpool(1);
 	pool_UploadStauts = new threadpool(1);
+	pool_UpdataCount = new threadpool(1);
 
 	//TODO:在此添加额外的初始化代码
 	//先去平台签到，拿到机构号
@@ -219,6 +221,7 @@ BOOL CLedCtrlServerDlg::OnInitDialog()
 		tips(_T("[OnInitDialog]--获取配置文件中的平台地址字段失败！"));
 		return FALSE;
 	}
+	InitQueueList();
 	DWORD dwThreadId = 0;
 	m_hReSign = CreateThread(NULL, 0, ReSignThreadProc, this, 0, &dwThreadId);
 	LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[OnInitDialog]--CreateThread ReSignThreadProc");
@@ -238,6 +241,59 @@ void CLedCtrlServerDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	{
 		CDialogEx::OnSysCommand(nID, lParam);
 	}
+}
+
+
+void CLedCtrlServerDlg::InitQueueList()
+{
+	LONG lStyle;
+	lStyle = GetWindowLong(m_list_queue.m_hWnd, GWL_STYLE);//获取当前窗口style
+	lStyle &= ~LVS_TYPEMASK; //清除显示方式位
+	lStyle |= LVS_REPORT; //设置style
+
+	SetWindowLong(m_list_queue.m_hWnd, GWL_STYLE, lStyle);//设置style
+
+	DWORD dwStyle = m_list_queue.GetExtendedStyle();
+	dwStyle |= LVS_EX_FULLROWSELECT;                                        //选中某行使整行高亮(LVS_REPORT)	
+	dwStyle |= LVS_EX_GRIDLINES;                                            //网格线(LVS_REPORT)
+	m_list_queue.SetExtendedStyle(dwStyle);
+
+	m_list_queue.InsertColumn(0, _T("卡类型"), LVCFMT_LEFT, 55);
+	m_list_queue.InsertColumn(1, _T("工作中线程"), LVCFMT_LEFT, 75);
+	m_list_queue.InsertColumn(2, _T("空闲线程"), LVCFMT_LEFT, 75);
+	m_list_queue.InsertColumn(3, _T("等待数处理"), LVCFMT_LEFT, 75);
+
+	m_list_queue.InsertItem(0, "仰邦");
+	m_list_queue.InsertItem(1, "诣阔");
+	m_list_queue.InsertItem(2, "视展D");
+	m_list_queue.InsertItem(3, "励研");
+	m_list_queue.InsertItem(4, "视展A");
+
+	vector<threadpool*>vecpool;
+	vecpool.push_back(pool_BX);
+	vecpool.push_back(pool_EQ);
+	vecpool.push_back(pool_VSD);
+	vecpool.push_back(pool_CL);
+	vecpool.push_back(pool_VSA);
+
+	pool_UpdataCount->enqueue([=]() {
+		while (m_bExit ==FALSE )
+		{
+			for (int nSelectIndex =0; nSelectIndex< vecpool.size(); nSelectIndex++)
+			{
+				CString strTemp = "";
+				//最新的一个数字
+				strTemp.Format("%d", vecpool[nSelectIndex]->get_workers_count());
+				m_list_queue.SetItemText(nSelectIndex, 1, strTemp);
+				strTemp.Format("%d", vecpool[nSelectIndex]->get_idle_count_reference());
+				m_list_queue.SetItemText(nSelectIndex, 2, strTemp);
+				strTemp.Format("%d", vecpool[nSelectIndex]->get_tasksqueue_count());
+				m_list_queue.SetItemText(nSelectIndex, 3, strTemp);
+			}
+			Sleep(100);
+		}
+
+	});
 }
 
 // 如果向对话框添加最小化按钮，则需要下面的代码
@@ -297,6 +353,7 @@ void CLedCtrlServerDlg::OnTimer(UINT_PTR nIDEvent)
 void CLedCtrlServerDlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
+	m_bExit = TRUE;
 
 	delete pool_EQ;
 	delete pool_CL;
@@ -304,8 +361,8 @@ void CLedCtrlServerDlg::OnDestroy()
 	delete pool_VSD;
 	delete pool_VSA;
 	delete pool_UploadStauts;
+	delete pool_UpdataCount;
 	// TODO: 在此处添加消息处理程序代码
-	m_bExit = TRUE;
 	SetEvent(m_hRMQEvent);
 	WaitForSingleObject(m_hRMQ, 3000);
 	m_hRMQ = NULL;
@@ -975,21 +1032,21 @@ void CLedCtrlServerDlg::DealPublicPrgm(CString strJson,CString strUrl,CString st
 				}
 				else if (strDeviceModel == "BX-5" || strDeviceModel == "BX-E" || strDeviceModel == "BX-5E" || strDeviceModel == "BX-6E" || strDeviceModel == "BX-6")
 				{
-					pool_CL->enqueue([=]() {
+					pool_BX->enqueue([=]() {
 						SendToBX(strHttpAddr, strLedType, strDeviceModel,  strIP, strPort, strPrgmEffect, strPrgmContent,
 							strHeight, strWidth, strPrgmFontSize, strPrgmPlaySpeed, strPrgmStayTime, strDeviceID, strPublicUser, strPublicTime, strPrgmID);
 					});
 				}
 				else if (strDeviceModel == "VSA")
 				{
-					pool_CL->enqueue([=]() {
+					pool_VSA->enqueue([=]() {
 						SendToVSA(strHttpAddr,strIP, strPrgmEffect, strPrgmContent, strHeight, strWidth,
 							 strPrgmPlaySpeed,strDeviceID, strPublicUser, strPublicTime, strPrgmID);
 					});
 				}
 				else if (strDeviceModel == "VSD")
 				{
-					pool_CL->enqueue([=]() {
+					pool_VSD->enqueue([=]() {
 						SendToVSD(strHttpAddr, strLedType, strPort, strIP, strPrgmEffect, strPrgmContent,
 							strHeight, strWidth, strPrgmFontSize, strPrgmPlaySpeed,strDeviceID, strPublicUser, strPublicTime, strPrgmID);
 					});
@@ -1079,13 +1136,13 @@ BOOL CLedCtrlServerDlg:: SendToEQ(
 			BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 			if (IsSuccess)
 			{
-				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发成功[%s],耗时%f", strIP,endtime);
+				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发成功[%s],耗时%.1f秒", strIP,endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]-诣阔卡下发节目成功[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
-				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发成功[%s],耗时%f", strIP, endtime);
+				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--诣阔控制卡节目下发成功,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 			}
@@ -1096,18 +1153,19 @@ BOOL CLedCtrlServerDlg:: SendToEQ(
 			BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 			if (IsSuccess)
 			{
-				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发失败[%s],耗时%f", strIP, endtime);
+				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--诣阔控制卡下发节目失败，上送节目下发状态成功[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
-				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发失败[%s],耗时%f", strIP, endtime);
+				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--诣阔控制卡节目下发失败,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 			}
 		}
 	});
+	
 
 	return TRUE;
 }
@@ -1429,13 +1487,13 @@ Thread:
 			BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 			if (IsSuccess)
 			{
-				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发成功[%s],耗时%f", strIP, endtime);
+				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]-励研控制卡下发节目成功[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
-				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发成功[%s],耗时%f", strIP, endtime);
+				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--励研控制卡节目下发成功,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 			}
@@ -1445,13 +1503,13 @@ Thread:
 			BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 			if (IsSuccess)
 			{
-				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发失败[%s],耗时%f", strIP, endtime);
+				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--励研卡节目下发失败[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
-				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发失败[%s],耗时%f", strIP, endtime);
+				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--励研卡下发失败,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 			}
@@ -1500,13 +1558,13 @@ Thread:
 				BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 				if (IsSuccess)
 				{
-					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发成功[%s],耗时%f", strIP, endtime);
+					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
 					tips(strTips);
 					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--仰邦卡下发节目成功[%s][%s]", strIP, strPrgmID);
 				}
 				else
 				{
-					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发成功[%s],耗时%f", strIP, endtime);
+					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
 					tips(strTips);
 					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--仰邦卡节目下发成功,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 				}
@@ -1517,13 +1575,13 @@ Thread:
 				BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 				if (IsSuccess)
 				{
-					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发失败[%s],耗时%f", strIP, endtime);
+					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
 					tips(strTips);
 					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--仰邦卡节目下发失败[%s][%s]", strIP, strPrgmID);
 				}
 				else
 				{
-					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发失败[%s],耗时%f", strIP, endtime);
+					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
 					tips(strTips);
 					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--仰邦卡下发失败,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 				}
@@ -1579,13 +1637,13 @@ Thread:
 				BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 				if (IsSuccess)
 				{
-					strTips.Format("[DealPublicPrgm]--视展控A卡节目下发成功[%s],耗时%f", strIP, endtime);
+					strTips.Format("[DealPublicPrgm]--视展控A卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
 					tips(strTips);
 					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--视展控A卡下发节目成功[%s][%s]", strIP, strPrgmID);
 				}
 				else
 				{
-					strTips.Format("[DealPublicPrgm]--视展控控A卡节目下发成功[%s],耗时%f", strIP, endtime);
+					strTips.Format("[DealPublicPrgm]--视展控控A卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
 					tips(strTips);
 					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]---视展控A卡下发节目成功,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 				}
@@ -1632,7 +1690,7 @@ Thread:
 			{
 				strBody.Format("\"itemtype\":\"3\",\"status\":\"1\",\"mmpdeviceid\":\"%s\",\"releaseuser\":\"%s\",\"releasetime\":\"%s\",\"itemId\":\"%s\"", strDeviceID, strPublicUser, strPublicTime, strPrgmID);
 				IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
-				strTips.Format("[DealPublicPrgm]--视展控D卡节目下发失败[%s],耗时%f", strIP, endtime);
+				strTips.Format("[DealPublicPrgm]--视展控D卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
 				tips(strTips);
 				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--视展控D卡节目下发失败[%s][%s]", strIP, strPrgmID);
 			}
@@ -1643,7 +1701,7 @@ Thread:
 				IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 				if (IsSuccess)
 				{
-					strTips.Format("[DealPublicPrgm]--视展控D卡节目下发成功[%s],耗时%f", strIP, endtime);
+					strTips.Format("[DealPublicPrgm]--视展控D卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
 					tips(strTips);
 					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--视展控D卡下发节目成功[%s][%s]", strIP, strPrgmID);
 				}

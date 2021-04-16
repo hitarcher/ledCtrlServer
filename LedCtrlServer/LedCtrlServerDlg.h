@@ -17,6 +17,7 @@
 #include "json.hpp"
 using json = nlohmann::json;
 #include "mythreadpool.h"
+#include "afxcmn.h"
 
 // CLedCtrlServerDlg 对话框
 class CLedCtrlServerDlg : public CDialogEx
@@ -185,7 +186,7 @@ public:
 		, CString strPrgmID);
 
 	threadpool* pool_UploadStauts;
-
+	threadpool* pool_UpdataCount;
 
 protected:
 	HINSTANCE             hMU_DLL;//导入动态库
@@ -196,4 +197,8 @@ protected:
 #endif
 	typedef BOOL(LIBRARY_MODE *_MC_PicToXMPXFile)(int colortype, int width, int height, BOOL bstretch, char* Pictfilename, char* XMPfilename);
 	_MC_PicToXMPXFile	  MC_PicToXMPXFile;
+public:
+	CListCtrl m_list_queue;
+	void CLedCtrlServerDlg::InitQueueList();
+
 };
