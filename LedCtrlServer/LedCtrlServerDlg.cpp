@@ -184,6 +184,7 @@ BOOL CLedCtrlServerDlg::OnInitDialog()
 	// IDM_ABOUTBOX 必须在系统命令范围内。
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
+	LOG_DD(LOGTYPE_DEBUG, RESTARTLOG, "[OnInitDialog]--重新启动");
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu != NULL)
@@ -217,14 +218,13 @@ BOOL CLedCtrlServerDlg::OnInitDialog()
 	BOOL bResult = g_Config.LoadUrl();
 	if (!bResult)
 	{
-		LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[OnInitDialog]--获取配置文件中的平台地址字段失败！");
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[OnInitDialog]--获取配置文件中的平台地址字段失败！");
 		tips(_T("[OnInitDialog]--获取配置文件中的平台地址字段失败！"));
 		return FALSE;
 	}
 	InitQueueList();
 	DWORD dwThreadId = 0;
 	m_hReSign = CreateThread(NULL, 0, ReSignThreadProc, this, 0, &dwThreadId);
-	LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[OnInitDialog]--CreateThread ReSignThreadProc");
 	tips(_T("[OnInitDialog]--CreateThread ReSignThreadProc"));
 	SetTimer(TIMER_RESIGN, 10, NULL);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -261,20 +261,21 @@ void CLedCtrlServerDlg::InitQueueList()
 	m_list_queue.InsertColumn(0, _T("卡类型"), LVCFMT_LEFT, 55);
 	m_list_queue.InsertColumn(1, _T("工作中线程"), LVCFMT_LEFT, 75);
 	m_list_queue.InsertColumn(2, _T("空闲线程"), LVCFMT_LEFT, 75);
-	m_list_queue.InsertColumn(3, _T("等待数处理"), LVCFMT_LEFT, 75);
+	m_list_queue.InsertColumn(3, _T("等待处理数"), LVCFMT_LEFT, 75);
+	m_list_queue.InsertColumn(4, _T("平均耗时"), LVCFMT_LEFT, 75);
 
 	m_list_queue.InsertItem(0, "仰邦");
 	m_list_queue.InsertItem(1, "诣阔");
 	m_list_queue.InsertItem(2, "视展D");
-	m_list_queue.InsertItem(3, "励研");
-	m_list_queue.InsertItem(4, "视展A");
+	m_list_queue.InsertItem(3, "视展A");
+	m_list_queue.InsertItem(4, "励研");
 
 	vector<threadpool*>vecpool;
 	vecpool.push_back(pool_BX);
 	vecpool.push_back(pool_EQ);
 	vecpool.push_back(pool_VSD);
-	vecpool.push_back(pool_CL);
 	vecpool.push_back(pool_VSA);
+	vecpool.push_back(pool_CL);
 
 	pool_UpdataCount->enqueue([=]() {
 		while (m_bExit ==FALSE )
@@ -289,6 +290,9 @@ void CLedCtrlServerDlg::InitQueueList()
 				m_list_queue.SetItemText(nSelectIndex, 2, strTemp);
 				strTemp.Format("%d", vecpool[nSelectIndex]->get_tasksqueue_count());
 				m_list_queue.SetItemText(nSelectIndex, 3, strTemp);
+				strTemp.Format("%d", vecpool[nSelectIndex]->get_tasksqueue_count());
+				m_list_queue.SetItemText(nSelectIndex, 4, strTemp);
+
 			}
 			Sleep(100);
 		}
@@ -382,7 +386,7 @@ void CLedCtrlServerDlg::OnDestroy()
 	onbon.OnbonReleaseSdk();
 	//励研SCL2008
 	scl2008.LED_SCL2008FreeDll();
-	LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[OnDestroy]--程序退出");
+	LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[OnDestroy]--程序退出");
 }
 
 BOOL CLedCtrlServerDlg::LoadDeviceConfig()
@@ -469,13 +473,10 @@ BOOL CLedCtrlServerDlg::LoadDeviceConfig()
 
 	if (FALSE == LoadRMQPubAndRMQSUBDLL())
 	{
-		LOG(LOGTYPE_DEBUG, SERVERLOG, "[LoadDeviceConfig]-动态库加载失败:[%s]", m_strLastErr);
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[LoadDeviceConfig]-动态库加载失败:[%s]", m_strLastErr);
 		return FALSE;
 	}
 	RMQ_SUBConnect();
-	LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[LoadDeviceConfig]--CreateThread RMQThreadProc");
-	LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[LoadDeviceConfig]--CreateThread DeviceStatusThreadProc");
-	LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[LoadDeviceConfig]--CreateThread MMPDeviceStatusThreadProc");
 
 	tips(_T("[LoadDeviceConfig]--CreateThread RMQThreadProc"));
 	tips(_T("[LoadDeviceConfig]--CreateThread DeviceStatusThreadProc"));
@@ -490,25 +491,25 @@ void CLedCtrlServerDlg::UploadMMPDeviceStatus(CString strIP, CString strCode)
 	if (bIsPing)
 	{
 		BOOL bRet = m_toolTrade.UpLoadMMPDeviceStatus(g_Config.m_strHttpUrl, strCode);
-		LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "DeviceStatusThreadContent--[%s]", "调用上送门楣屏设备状态接口");
+		//LOG_DD(LOGTYPE_DEBUG, SERVEROFFLINE, "UploadMMPDeviceStatus--[%s]", "调用上送门楣屏设备状态接口");
 		if (bRet)
 		{
 			CTime tmBegin = CTime::GetCurrentTime();
 			CString str_Begin = tmBegin.Format("%Y%m%d%H%M%S");
-			LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "DeviceStatusThreadContent--[门楣屏设备在线且状态上传成功！][%s],[%s]", str_Begin, m_MMPDeviceCode);
+			LOG_DD(LOGTYPE_DEBUG, SERVEROFFLINE, "UploadMMPDeviceStatus--[门楣屏设备在线/状态上传成功],[%s],[%s],[%s]", str_Begin, m_MMPDeviceCode, m_MMPDeviceIP);
 		}
 		else
 		{
 			CTime tmBegin = CTime::GetCurrentTime();
 			CString str_Begin = tmBegin.Format("%Y%m%d%H%M%S");
-			LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "DeviceStatusThreadContent--[门楣屏设备状态在线但状态上传失败！][%s],[%s]", str_Begin, m_MMPDeviceCode);
+			LOG_DD(LOGTYPE_DEBUG, SERVEROFFLINE, "UploadMMPDeviceStatus--[门楣屏设备在线/状态上传失败],[%s],[%s],[%s]", str_Begin, m_MMPDeviceCode, m_MMPDeviceIP);
 		}
 	}
 	else
 	{
 		CTime tmBegin = CTime::GetCurrentTime();
 		CString str_Begin = tmBegin.Format("%Y%m%d%H%M%S");
-		LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "DeviceStatusThreadContent--[门楣屏设备离线],[%s],[%s],[%s]", str_Begin, m_MMPDeviceCode, m_MMPDeviceIP);
+		LOG_DD(LOGTYPE_DEBUG, SERVEROFFLINE, "UploadMMPDeviceStatus--[门楣屏设备离线             ],[%s],[%s],[%s]", str_Begin, m_MMPDeviceCode, m_MMPDeviceIP);
 	}
 }
 
@@ -543,7 +544,7 @@ BOOL CLedCtrlServerDlg::LoadRMQPubAndRMQSUBDLL()
 		goto EXIT;
 	}
 	_RMQ_CALLBACK(_Recv);
-	LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[LoadRMQPubAndRMQSUBDLL]--动态库RMQ.dll加载成功");
+	LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[LoadRMQPubAndRMQSUBDLL]--动态库RMQ.dll加载成功");
 	return TRUE;
 EXIT:
 	return FALSE;
@@ -555,7 +556,7 @@ BOOL CLedCtrlServerDlg::RMQ_SUBConnect()
 		|| g_Config.m_strAccount.GetLength() <= 0 || g_Config.m_strPassword.GetLength() <= 0 || g_Config.m_nModeName < 0
 		|| g_Config.m_strExchangeName.GetLength() <= 0 || g_Config.m_vecRouteKey.size() <= 0 || g_Config.m_nChannel < 0)
 	{
-		LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQSUBConnect]--配置文件参数填写异常...");
+		LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQSUBConnect]--配置文件参数填写异常...");
 		return FALSE;
 	}
 	CString strRouteKey = "";
@@ -571,18 +572,28 @@ BOOL CLedCtrlServerDlg::RMQ_SUBConnect()
 
 	if (nState != 0)
 	{
-		LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQSUBConnect]--RMQ连接失败...");
+		LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQSUBConnect]--RMQ连接失败...");
 		return FALSE;
 	}
-	LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQSUBConnect]--RMQ连接成功...");
+	LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQSUBConnect]--RMQ连接成功...");
 	return TRUE;
 }
 
 BOOL CLedCtrlServerDlg::RMQ_DealCustomMsg(CString strMsg)
 {
-	LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--RMQ收到消息[%s]", strMsg);
 	if (strMsg == "") return FALSE;
 	std::vector<CString> vct = SplitString(strMsg.GetBuffer(), "|");
+
+	LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "RMQ_DealCustomMsg---[%s]", strMsg);
+// 	if (vct[0].CompareNoCase("OFFLINE") != 0)
+// 	{
+// 		LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[%s]", strMsg);
+// 	}
+// 	else
+// 	{
+// 		LOG(LOGTYPE_DEBUG, LEDRMQLOG, "RMQ_DealCustomMsg", "[%s]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", strMsg);
+// 	}
+
 	if (vct.size() >= 1)
 	{
 		if (vct[0].CompareNoCase("PUBLISH") == 0)
@@ -599,7 +610,7 @@ BOOL CLedCtrlServerDlg::RMQ_DealCustomMsg(CString strMsg)
 				BOOL bRet = m_toolTrade.GetPrgms(g_Config.m_strHttpUrl, strJsonIn, m_strPrgmJson);
 				if (bRet)
 				{
-					LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--下载节目json成功[%s]", m_strPrgmJson);
+					LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQ_DealCustomMsg]--下载节目json成功");
 					std::thread t1([&](CString t1_strJson, CString t1_strUrl,CString t1_strUser,CString t1_strTime,CString t1_strID){
 						DealPublicPrgm(t1_strJson,t1_strUrl,t1_strUser,t1_strTime,t1_strID);
 					}, m_strPrgmJson, g_Config.m_strHttpUrl, m_strPublishUers, m_strPublishTime, m_strPrgmID);
@@ -615,25 +626,24 @@ BOOL CLedCtrlServerDlg::RMQ_DealCustomMsg(CString strMsg)
 					bRet = m_toolTrade.UpLoadProGrameStatus(g_Config.m_strHttpUrl, strBody);
 					if (!bRet)
 					{
-						LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--[m_toolTrade.UpLoadProGrameStatus][err][%s]", m_toolTrade.GetLastErr());
+						LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQ_DealCustomMsg]--[m_toolTrade.UpLoadProGrameStatus][err][%s]", m_toolTrade.GetLastErr());
 					}
 					else
 					{
 						tips(_T("[RMQ_DealCustomMsg]--调用平台节目发布接口失败！"));
-						LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--[m_toolTrade.GetPrgms][err][%s]", m_toolTrade.GetLastErr());
+						LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQ_DealCustomMsg]--[m_toolTrade.GetPrgms][err][%s]", m_toolTrade.GetLastErr());
 					}
 				}
 			}
 			else
 			{
-				LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--[RMQ_DealCustomMsg][err][未知设备][%s]", vct[1]);
+				LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQ_DealCustomMsg]--[RMQ_DealCustomMsg][err][未知设备][%s]", vct[1]);
 			}
 		}
 		else if (vct[0].CompareNoCase("OFFLINE") == 0)
 		{
 			if (vct.size() == 5)
 			{
-				LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--收到平台推送的上送门楣屏终端设备状态的消息");
 				m_MMPDeviceCode = vct[3];
 				m_MMPDeviceIP = vct[4];
 				/*edit by mingl*/
@@ -646,20 +656,20 @@ BOOL CLedCtrlServerDlg::RMQ_DealCustomMsg(CString strMsg)
 			}
 			else
 			{
-				LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--收到平台推送的上送中转服务状态的消息");
+				//LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQ_DealCustomMsg]--[上送中转服务状态]");
 				SetEvent(m_hDviceStatusEvent);
 			}
 		}
 		else
 		{
 			// 未知消息
-			LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--[RMQ_DealCustomMsg][err][未知消息][%s]", vct[0]);
+			LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQ_DealCustomMsg]--[RMQ_DealCustomMsg][err][未知消息][%s]", vct[0]);
 		}
 	}
 	else
 	{
 		// 报文格式错
-		LOG_DD(LOGTYPE_DEBUG, RMQLOG, "[RMQ_DealCustomMsg]--[RMQ_DealCustomMsg][err][报文格式错][%s]", strMsg);
+		LOG_DD(LOGTYPE_DEBUG, LEDRMQLOG, "[RMQ_DealCustomMsg]--[RMQ_DealCustomMsg][err][报文格式错][%s]", strMsg);
 	}
 	return TRUE;
 }
@@ -708,30 +718,23 @@ DWORD CLedCtrlServerDlg::ReSignThreadContent(LPVOID pParam)
 			BOOL bRet = m_toolTrade.Login(g_Config.m_strHttpUrl.GetBuffer(0));
 			if (FALSE == bRet)
 			{
-				LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[ReSignThreadContent]--[m_toolTrade.Login][err][%s]", m_toolTrade.GetLastErr());
+				//LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[ReSignThreadContent]--[m_toolTrade.Login][err][%s]", m_toolTrade.GetLastErr());
 				//签到失败，10s重新签到一次
 				SetTimer(TIMER_RESIGN, 10 * 1000, NULL);
-				icount++;
-				if (icount == 2)
-				{
-					LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[ReSignThreadContent]--[%s]", "签到失败...");
-					tips(_T("[ReSignThreadContent]--签到失败..."));
-				}
+				tips(_T("[ReSignThreadContent]--签到失败..."+ m_toolTrade.GetLastErr()));
 			}
 			else
 			{
 				icount = 0;
-				LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[ReSignThreadContent]--[%s]", "签到成功！");
 				tips(_T("[ReSignThreadContent]--签到成功"));
 				//签到成功后通过报文获取到机构号然后再读取配置文件
 				BOOL bRent = LoadDeviceConfig();
 				if (!bRent)
 				{
-					LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "[ReSignThreadContent]--[%s]", "程序初始化失败...");
 					tips(_T("[ReSignThreadContent]--程序初始化失败..."));
 				}
-				ResetEvent(m_hReSignEvent);
 			}
+			ResetEvent(m_hReSignEvent);
 		}
 	}
 	return TRUE;
@@ -757,13 +760,13 @@ DWORD CLedCtrlServerDlg::DeviceStatusThreadContent(LPVOID pParam)
 			{
 				CTime tmBegin = CTime::GetCurrentTime();
 				CString str_Begin = tmBegin.Format("%Y%m%d%H%M%S");
-				LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "DeviceStatusThreadContent--[设备状态上传成功！][%s]", str_Begin);
+				LOG_DD(LOGTYPE_DEBUG, SERVEROFFLINE, "DeviceStatusThreadContent--[设备状态上传成功！][%s]", str_Begin);
 			}
 			else
 			{
 				CTime tmBegin = CTime::GetCurrentTime();
 				CString str_Begin = tmBegin.Format("%Y%m%d%H%M%S");
-				LOG_DD(LOGTYPE_DEBUG, SERVERLOG, "DeviceStatusThreadContent--[设备状态上传失败！][%s]", str_Begin);
+				LOG_DD(LOGTYPE_DEBUG, SERVEROFFLINE, "DeviceStatusThreadContent--[设备状态上传失败！][%s]", str_Begin);
 			}
 		}
 		ResetEvent(m_hDviceStatusEvent);
@@ -813,13 +816,13 @@ void CLedCtrlServerDlg::ThreadPoolPublishPrgm(CString strHttpAddr,CString strPrg
 	//		IsSuccess = m_toolTrade.UpLoadProGrameStatus(t_strHttpAddr, strBody);
 	//		if (IsSuccess)
 	//		{
-	//			tips(_T("[ThreadPoolPublishPrgm]--诣阔控制卡节目下发成功"));
+	//			tips(_T("[ThreadPoolPublishPrgm]--诣阔卡下发成功"));
 	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]-诣阔卡下发节目成功[%s][%s]", t_strIP, t_strPrgmID);
 	//		}
 	//		else
 	//		{
-	//			tips(_T("[ThreadPoolPublishPrgm]--诣阔控制卡节目下发成功"));
-	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]--诣阔控制卡节目下发成功,上送节目下发结果失败[%s][%s]", t_strIP, t_strPrgmID);
+	//			tips(_T("[ThreadPoolPublishPrgm]--诣阔卡下发成功"));
+	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]--诣阔卡下发成功,上送节目下发结果失败[%s][%s]", t_strIP, t_strPrgmID);
 	//		}
 	//	}
 	//	else
@@ -829,13 +832,13 @@ void CLedCtrlServerDlg::ThreadPoolPublishPrgm(CString strHttpAddr,CString strPrg
 	//		IsSuccess = m_toolTrade.UpLoadProGrameStatus(t_strHttpAddr, strBody);
 	//		if (IsSuccess)
 	//		{
-	//			tips(_T("[ThreadPoolPublishPrgm]--诣阔控制卡节目发布失败"));
+	//			tips(_T("[ThreadPoolPublishPrgm]--诣阔卡发布失败"));
 	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]--诣阔控制卡下发节目失败，上送节目下发状态成功[%s][%s]", t_strIP, t_strPrgmID);
 	//		}
 	//		else
 	//		{
-	//			tips(_T("[ThreadPoolPublishPrgm]--诣阔控制卡节目发布失败"));
-	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]--诣阔控制卡节目下发失败,上送节目下发结果失败[%s][%s]", t_strIP, t_strPrgmID);
+	//			tips(_T("[ThreadPoolPublishPrgm]--诣阔卡发布失败"));
+	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]--诣阔卡下发失败,上送节目下发结果失败[%s][%s]", t_strIP, t_strPrgmID);
 	//		}
 	//	}
 	//}
@@ -849,13 +852,13 @@ void CLedCtrlServerDlg::ThreadPoolPublishPrgm(CString strHttpAddr,CString strPrg
 	//		IsSuccess = m_toolTrade.UpLoadProGrameStatus(t_strHttpAddr, strBody);
 	//		if (IsSuccess)
 	//		{
-	//			tips(_T("[ThreadPoolPublishPrgm]--励研控制卡节目下发成功"));
+	//			tips(_T("[ThreadPoolPublishPrgm]--励研卡下发成功"));
 	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]-励研控制卡下发节目成功[%s][%s]", t_strIP, t_strPrgmID);
 	//		}
 	//		else
 	//		{
-	//			tips(_T("[ThreadPoolPublishPrgm]--励研控制卡节目下发成功"));
-	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]--励研控制卡节目下发成功,上送节目下发结果失败[%s][%s]", t_strIP, t_strPrgmID);
+	//			tips(_T("[ThreadPoolPublishPrgm]--励研卡下发成功"));
+	//			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[ThreadPoolPublishPrgm]--励研卡下发成功,上送节目下发结果失败[%s][%s]", t_strIP, t_strPrgmID);
 	//		}
 	//	}
 	//	else
@@ -977,7 +980,7 @@ void CLedCtrlServerDlg::ThreadPoolPublishPrgm(CString strHttpAddr,CString strPrg
 
 void CLedCtrlServerDlg::DealPublicPrgm(CString strJson,CString strUrl,CString strUser,CString strTime,CString strID)
 {
-	LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--开始发布节目");
+	//LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[%s]--开始发布节目");
 	CString strPrgm = strJson;
 	CString strHttpAddr = strUrl;
 	CString strPublicUser = strUser;
@@ -1015,7 +1018,7 @@ void CLedCtrlServerDlg::DealPublicPrgm(CString strJson,CString strUrl,CString st
 				CString strBody = "";
 				BOOL IsSuccess = FALSE;
 				if (strDeviceModel == "EQ3002-I" || strDeviceModel == "EQ3002-II" || strDeviceModel == "EQ3002-III" || strDeviceModel == "EQ2008-I/II" || 
-					strDeviceModel == "EQ2010-I" || strDeviceModel == "EQ2008 - IE" || strDeviceModel == "EQ2011" || strDeviceModel == "EQ2012" || 
+					strDeviceModel == "EQ2010-I" || strDeviceModel == "EQ2008-IE" || strDeviceModel == "EQ2011" || strDeviceModel == "EQ2012" || 
 					strDeviceModel == "EQ2008-M" || strDeviceModel == "EQ2013" || strDeviceModel == "EQ2023" || strDeviceModel == "EQ2033")
 				{
 					pool_EQ->enqueue([=]() {
@@ -1058,15 +1061,13 @@ void CLedCtrlServerDlg::DealPublicPrgm(CString strJson,CString strUrl,CString st
 					IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 					if (IsSuccess)
 					{
-						strTips.Format("[DealPublicPrgm]--下发失败，不支持此种控制卡[%s][%s]", strDeviceModel, strIP);
+						strTips.Format("[%s]--下发失败，不支持此种控制卡[%s][%s]", GetCurTime(DATE_LONG).c_str(),strDeviceModel, strIP);
 						tips(strTips);
-						LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--不支持此种控制卡[%s][%s]", strDeviceModel, strIP);
 					}
 					else
 					{
-						strTips.Format("[DealPublicPrgm]--下发失败,不支持此种控制卡,上送节目下发结果失败[%s][%s]", strDeviceModel, strIP);
+						strTips.Format("[%s]--下发失败,不支持此种控制卡,上送节目下发结果失败[%s][%s]", GetCurTime(DATE_LONG).c_str(), strDeviceModel, strIP);
 						tips(strTips);
-						LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--上送节目下发结果失败[%s][%s]", strPrgmID, strIP);
 					}
 				}
 				//std::thread t2([&](CString t2_strHttpAddr, CString t2_strPrgmID, CString t2_strPublicUser, CString t2_strPublicTime, CString t2_strDeviceModel, CString t2_strCardAddr, CString t2_strDeviceID, CString t2_strIP, CString t2_strPort, CString t2_strLedType, CString t2_strControlCardType, CString t2_strHeight, CString t2_strWidth, CString t2_strPrgmType, CString t2_strPrgmFontSize, CString t2_strPrgmContent, CString t2_strPrfmIndex, CString t2_strPrgmEffect, CString t2_strPrgmStayTime, CString t2_strPrgmPlaySpeed){
@@ -1087,16 +1088,14 @@ void CLedCtrlServerDlg::DealPublicPrgm(CString strJson,CString strUrl,CString st
 		BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 		if (IsSuccess)
 		{
-			tips(_T("[DealPublicPrgm]--解析json的body字段失败，上送下发状态成功"));
-			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--解析json的body字段失败,上送下发状态成功");
+			tips(_T("[%s]--解析json的body字段失败，上送下发状态成功", GetCurTime(DATE_LONG).c_str()));
 		}
 		else
 		{
-			tips(_T("[DealPublicPrgm]--解析json的body字段失败，上送下发状态失败"));
-			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--解析json的body字段失败,上送下发状态失败");
+			tips(_T("[%s]--解析json的body字段失败，上送下发状态失败", GetCurTime(DATE_LONG).c_str()));
 		}
 	}
-	LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--发布节目结束");
+//	LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[%s]--发布节目结束");
 }
 
 
@@ -1122,7 +1121,9 @@ BOOL CLedCtrlServerDlg:: SendToEQ(
 
 	clock_t start, end;
 	start = clock();		//函数开始计时
+	EQ_mutex_streamthread.lock();
 	BOOL IsSuccess = EQSendPrgm(strFilepath.GetBuffer(0), strLedType, strDeviceModel, strIP, strPrgmEffect, strPrgmContent, strHeight, strWidth, strPrgmFontSize, strPrgmPlaySpeed, strPrgmStayTime);
+	EQ_mutex_streamthread.unlock();
 	end = clock();
 	double endtime = (double)(end - start) / CLOCKS_PER_SEC;
 
@@ -1136,15 +1137,13 @@ BOOL CLedCtrlServerDlg:: SendToEQ(
 			BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 			if (IsSuccess)
 			{
-				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发成功[%s],耗时%.1f秒", strIP,endtime);
+				strTips.Format("[%s]--诣阔卡下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP,endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]-诣阔卡下发节目成功[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
-				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
+				strTips.Format("[%s]--诣阔卡下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--诣阔控制卡节目下发成功,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 			}
 		}
 		else
@@ -1153,15 +1152,13 @@ BOOL CLedCtrlServerDlg:: SendToEQ(
 			BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 			if (IsSuccess)
 			{
-				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
+				strTips.Format("[%s]--诣阔卡下发失败[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--诣阔控制卡下发节目失败，上送节目下发状态成功[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
-				strTips.Format("[DealPublicPrgm]--诣阔控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
+				strTips.Format("[%s]--诣阔卡下发失败[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--诣阔控制卡节目下发失败,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 			}
 		}
 	});
@@ -1175,6 +1172,7 @@ BOOL CLedCtrlServerDlg::EQSendPrgm(const char* pFile, CString strLedType, CStrin
 	CString strPrgmEffect, CString strPrgmContent, CString strHeight, CString strWidth, CString strPrgmFontSize,
 	CString strPrgmPlaySpeed, CString strPrgmStayTime)
 {
+	CString strTips = "";
 	int index = strIP.Find(".");
 	CString strIP0 = strIP.Left(index);
 	CString strIP_temp = strIP.Mid(index + 1);
@@ -1194,7 +1192,8 @@ BOOL CLedCtrlServerDlg::EQSendPrgm(const char* pFile, CString strLedType, CStrin
 	}
 	else
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[EQSendPrgm]--诣阔暂不支持此种类型的屏幕1代表单色屏，2代表双色屏[%s]", strLedType);
+		strTips.Format("[EQSendPrgm]--诣阔暂不支持此种类型的屏幕1代表单色屏，2代表双色屏[%s]", strLedType);
+		tips(strTips);
 		return FALSE;
 	}
 	if (strDeviceModel == "EQ3002-I")
@@ -1247,7 +1246,8 @@ BOOL CLedCtrlServerDlg::EQSendPrgm(const char* pFile, CString strLedType, CStrin
 	}
 	else
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[EQSendPrgm]--暂时不支持此种类型的诣阔控制卡[%s]", strDeviceModel);
+		strTips.Format("[EQSendPrgm]--暂时不支持此种类型的诣阔控制卡[%s]", strDeviceModel);
+		tips(strTips);
 		return FALSE;
 	}
 	WritePrivateProfileString("地址：0", "IpAddress0", strIP0, pFile);
@@ -1262,7 +1262,8 @@ BOOL CLedCtrlServerDlg::EQSendPrgm(const char* pFile, CString strLedType, CStrin
 	User_ReloadIniFile(strFilepath.GetBuffer(0));
 	if (!User_OpenScreen(m_iCardNum))
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[EQSendPrgm]--打开显示屏失败[%s]", strIP);
+		strTips.Format("[EQSendPrgm]--打开显示屏失败[%s]", strIP);
+		tips(strTips);
 		return FALSE;
 	}
 	else
@@ -1270,7 +1271,8 @@ BOOL CLedCtrlServerDlg::EQSendPrgm(const char* pFile, CString strLedType, CStrin
 		BOOL b_ret_clear = User_DelAllProgram(m_iCardNum);
 		if (!b_ret_clear)
 		{
-			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[EQSendPrgm]--删除节目失败[%s]", strIP);
+			strTips.Format("[EQSendPrgm]--删除节目失败[%s]", strIP);
+			tips(strTips);
 			return FALSE;
 		}
 		else
@@ -1278,7 +1280,8 @@ BOOL CLedCtrlServerDlg::EQSendPrgm(const char* pFile, CString strLedType, CStrin
 			m_iProgramIndex = User_AddProgram(m_iCardNum, FALSE, 60 * 60 * 24);
 			if (m_iProgramIndex == -1)
 			{
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[EQSendPrgm]--添加节目失败[%s]", strIP);
+				strTips.Format("[EQSendPrgm]--添加节目失败[%s]", strIP);
+				tips(strTips);
 				return FALSE;
 			}
 			else
@@ -1298,7 +1301,7 @@ BOOL CLedCtrlServerDlg::EQSendPrgm(const char* pFile, CString strLedType, CStrin
 				SingleText.FontInfo.colorFont = 0xFFFF;
 				SingleText.FontInfo.iFontSize = atoi(strPrgmFontSize);    //字体大小
 				SingleText.PartInfo.FrameColor = 0;
-				SingleText.FontInfo.strFontName = "";  //字体名称
+				SingleText.FontInfo.strFontName = "宋体";  //字体名称
 				SingleText.FontInfo.iAlignStyle = 0;   //对齐方式 0 －左对齐  1 －居中  2 －右对齐
 				SingleText.FontInfo.iVAlignerStyle = 0;
 				SingleText.MoveSet.bClear = 0;
@@ -1372,14 +1375,16 @@ BOOL CLedCtrlServerDlg::EQSendPrgm(const char* pFile, CString strLedType, CStrin
 				SingleText.MoveSet.iClearSpeed = 4;
 				if (-1 == User_AddSingleText(m_iCardNum, &SingleText, m_iProgramIndex))
 				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[EQSendPrgm]--添加单行文本失败[%s]", strIP);
+					strTips.Format("[EQSendPrgm]--添加单行文本失败[%s]", strIP);
+					tips(strTips);
 					return FALSE;
 				}
 				else
 				{
 					if (!User_SendToScreen(m_iCardNum))
 					{
-						LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[EQSendPrgm]--发送文本失败[%s]", strIP);
+						strTips.Format("[EQSendPrgm]--发送文本失败[%s]", strIP);
+						tips(strTips);
 						return FALSE;
 					}
 					else
@@ -1487,15 +1492,13 @@ Thread:
 			BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 			if (IsSuccess)
 			{
-				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
+				strTips.Format("[%s]--励研卡下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]-励研控制卡下发节目成功[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
-				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
+				strTips.Format("[%s]--励研卡下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--励研控制卡节目下发成功,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 			}
 		}
 		else {
@@ -1503,15 +1506,13 @@ Thread:
 			BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 			if (IsSuccess)
 			{
-				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
+				strTips.Format("[%s]--励研卡下发失败[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--励研卡节目下发失败[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
-				strTips.Format("[DealPublicPrgm]--励研控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
+				strTips.Format("[%s]--励研卡下发失败[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--励研卡下发失败,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 			}
 		}
 
@@ -1545,8 +1546,12 @@ Thread:
 		clock_t start, end;
 		start = clock();		//函数开始计时
 
+// 		IsSuccess = onbon.PublishPrograms(strIP, strPort, strLedType, strDeviceModel, strPrgmContent, atoi(strWidth), atoi(strHeight),
+// 			atoi(strPrgmFontSize), atoi(strPrgmEffect), atoi(strPrgmPlaySpeed), atoi(strPrgmStayTime));
+		BX_mutex_streamthread.lock();
 		IsSuccess = onbon.PublishPrograms(strIP, strPort, strLedType, strDeviceModel, strPrgmContent, atoi(strWidth), atoi(strHeight),
-			atoi(strPrgmFontSize), atoi(strPrgmEffect), atoi(strPrgmPlaySpeed), atoi(strPrgmStayTime));
+			atoi(strHeight)*3/4, atoi(strPrgmEffect), atoi(strPrgmPlaySpeed), atoi(strPrgmStayTime));
+		BX_mutex_streamthread.unlock();
 		end = clock();
 		double endtime = (double)(end - start) / CLOCKS_PER_SEC;
 		pool_UploadStauts->enqueue([=]() {
@@ -1558,15 +1563,13 @@ Thread:
 				BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 				if (IsSuccess)
 				{
-					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
+					strTips.Format("[%s]--仰邦卡下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 					tips(strTips);
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--仰邦卡下发节目成功[%s][%s]", strIP, strPrgmID);
 				}
 				else
 				{
-					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
+					strTips.Format("[%s]--仰邦卡下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 					tips(strTips);
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--仰邦卡节目下发成功,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 				}
 			}
 			else
@@ -1575,15 +1578,13 @@ Thread:
 				BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 				if (IsSuccess)
 				{
-					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
+					strTips.Format("[%s]--仰邦卡下发失败[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 					tips(strTips);
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--仰邦卡节目下发失败[%s][%s]", strIP, strPrgmID);
 				}
 				else
 				{
-					strTips.Format("[DealPublicPrgm]--仰邦控制卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
+					strTips.Format("[%s]--仰邦卡下发失败[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 					tips(strTips);
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--仰邦卡下发失败,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 				}
 			}
 		});
@@ -1619,15 +1620,17 @@ Thread:
 			strBody = "";
 			strBody.Format("\"itemtype\":\"3\",\"status\":\"1\",\"mmpdeviceid\":\"%s\",\"releaseuser\":\"%s\",\"releasetime\":\"%s\",\"itemId\":\"%s\"", strDeviceID, strPublicUser, strPublicTime, strPrgmID);
 			IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
-			strTips.Format("[DealPublicPrgm]---视展控A卡打开设备失败[%s");
+			strTips.Format("[%s]---视展控A卡打开设备失败[%s]", GetCurTime(DATE_LONG).c_str(), strIP);
 			tips(strTips);
-			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--视展控A卡节目下发失败[%s][%s]", strIP, strPrgmID);
 		}
 		else
 		{
 			clock_t start, end;
 			start = clock();		//函数开始计时
+			VSA_mutex_streamthread.lock();
 			vsa.LED_VSASendPrgm(atoi(strWidth), atoi(strHeight), strPrgmContent, atoi(strPrgmEffect), atoi(strPrgmPlaySpeed), 0, strIP);
+			VSA_mutex_streamthread.unlock();
+
 			end = clock();
 			double endtime = (double)(end - start) / CLOCKS_PER_SEC;
 
@@ -1637,15 +1640,13 @@ Thread:
 				BOOL IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 				if (IsSuccess)
 				{
-					strTips.Format("[DealPublicPrgm]--视展控A卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
+					strTips.Format("[%s]--视展控A卡节目下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 					tips(strTips);
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--视展控A卡下发节目成功[%s][%s]", strIP, strPrgmID);
 				}
 				else
 				{
-					strTips.Format("[DealPublicPrgm]--视展控控A卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
+					strTips.Format("[%s]--视展控控A卡节目下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 					tips(strTips);
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]---视展控A卡下发节目成功,上送节目下发结果失败[%s][%s]", strIP, strPrgmID);
 				}
 			});
 			return TRUE;
@@ -1690,9 +1691,8 @@ Thread:
 			{
 				strBody.Format("\"itemtype\":\"3\",\"status\":\"1\",\"mmpdeviceid\":\"%s\",\"releaseuser\":\"%s\",\"releasetime\":\"%s\",\"itemId\":\"%s\"", strDeviceID, strPublicUser, strPublicTime, strPrgmID);
 				IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
-				strTips.Format("[DealPublicPrgm]--视展控D卡节目下发失败[%s],耗时%.1f秒", strIP, endtime);
+				strTips.Format("[%s]--视展控D卡节目下发失败[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 				tips(strTips);
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--视展控D卡节目下发失败[%s][%s]", strIP, strPrgmID);
 			}
 			else
 			{
@@ -1701,9 +1701,8 @@ Thread:
 				IsSuccess = m_toolTrade.UpLoadProGrameStatus(strHttpAddr, strBody);
 				if (IsSuccess)
 				{
-					strTips.Format("[DealPublicPrgm]--视展控D卡节目下发成功[%s],耗时%.1f秒", strIP, endtime);
+					strTips.Format("[%s]--视展控D卡节目下发成功[%s],耗时%.1f秒", GetCurTime(DATE_LONG).c_str(), strIP, endtime);
 					tips(strTips);
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[DealPublicPrgm]--视展控D卡下发节目成功[%s][%s]", strIP, strPrgmID);
 				}
 			}
 		});

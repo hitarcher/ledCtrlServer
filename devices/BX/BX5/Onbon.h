@@ -3,6 +3,9 @@
 #include "Obasic_types.h"
 #include "COMMFCN.h"
 
+#include "bx_sdk_dual.h"
+#include "bx_dual_sdk.h"
+
 class Onbon
 {
 public:
@@ -1527,18 +1530,29 @@ public:
 	typedef int(__stdcall *PbxDual_cmd_setTimingReset)(Ouint8* ip, Ouint16 port, TimingReset *cmdData);
 	PbxDual_cmd_setTimingReset bxDual_cmd_setTimingReset;
 
+	/*! ***************************************************************
+	* 函数名：set_packetLen（）
+	* 参数名：packetLen 数据包长度
+	* 返回值：0 成功， 其他值为错误
+	* 功 能：用于设置控制各种通讯方式每一包最大长度
+	* 注：5E，6E，6Q系列最大数据长途64K（建议最大不要超过63*1024）
+	*     其他系列最大长度1K（1204）
+	******************************************************************/
+	typedef int(__stdcall *PbxDual_set_packetLen)(Ouint16 packetLen);
+	PbxDual_set_packetLen bxDual_set_packetLen;
+
 
 	BOOL addProgram_G5();
 	BOOL addArea_G5(Ouint16 AreaID, Ouint8 AreaType, Ouint16 AreaX, Ouint16 AreaY, Ouint16 AreaWidth, Ouint16 AreaHeight);
 	BOOL addAreaTime_G5(Ouint16 AreaID);
-	BOOL addAreaPicture_G5(Ouint16 AreaID, Ouint8 str[],int nFontSize, int nPlaySpeed);
+	BOOL addAreaPicture_G5(Ouint16 AreaID, Ouint8 str[],int nFontSize, int nPlaySpeed ,Ouint8 neffect);
 	BOOL tcp_send_program_G5(Ouint8* ip, Ouint16 port);
 	void addAreaPicturePic_G5(Ouint16 areaID);
 
 	BOOL addProgram_G6();
 	BOOL addArea_G6(Ouint16 AreaID, Ouint8 AreaType, Ouint16 AreaX, Ouint16 AreaY, Ouint16 AreaWidth, Ouint16 AreaHeight);
 	BOOL addAreaTime_G6(Ouint16 AreaID);
-	BOOL addAreaPicture_G6(Ouint16 AreaID, Ouint8 str[], int nFontSize, int nPlaySpeed);
+	BOOL addAreaPicture_G6(Ouint16 AreaID, Ouint8 str[], int nFontSize, int nPlaySpeed, Ouint8 neffect);
 	BOOL tcp_send_program_G6(Ouint8* ip, Ouint16 port);
 	static void Creat_sound_6(Ouint16 areaID);
 	void addAreaPicturePic_G6(Ouint16 areaID);

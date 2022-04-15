@@ -73,7 +73,10 @@ CString CTrade::AddMsgContent(CString strType,CString strOrgancode,CString strBo
 	//str_json.Replace(" ", "");
 	str_json.Replace("\n", "");//去掉所有的空格，回车，//
 	strContent.Format("%08d%s", str_json.GetLength(), str_json);
-	LOG_DD(LOGTYPE_DEBUG, TRADELOG, "AddMsgContent--请求报文为[%s]", strContent);
+	if (strType != "2011000008")
+	{
+		LOG_DD(LOGTYPE_DEBUG, TRADELOG, "AddMsgContent--请求报文为\n[%s]", strContent);
+	}
 	CString strDes = "";
 	strDes = Encode_3Des(strContent);
 	return strDes;
@@ -126,7 +129,7 @@ BOOL CTrade::GetPrgms(const char* pUrl, CString strJson,CString &strJsonOut)
 	CString strBack = httpClient.doPost(pUrl); 
 	CString strGBKRsp = Decode_3Des(strBack);
 	ConvertUtf8ToGBK(strGBKRsp);
-	LOG_DD(LOGTYPE_DEBUG, TRADELOG, "GetPrgms--获取到的节目信息为[%s]", strGBKRsp);
+	LOG_DD(LOGTYPE_DEBUG, TRADELOG, "GetPrgms--获取到的节目信息为\n[%s]\n", strGBKRsp);
 	if (FALSE == IsJsonData(strGBKRsp.GetBuffer(0)))
 	{
 		m_strLastErr = "非json字符串,"+ strGBKRsp;

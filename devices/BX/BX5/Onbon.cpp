@@ -77,7 +77,7 @@ BOOL Onbon::InitOnbonSdk()
 	bxDual_cmd_setBtnFunc = (PbxDual_cmd_setBtnFunc)GetProcAddress(hdll, "bxDual_cmd_setBtnFunc");
 	bxDual_cmd_setDelayTime = (PbxDual_cmd_setDelayTime)GetProcAddress(hdll, "bxDual_cmd_setDelayTime");
 	bxDual_cmd_setTimingReset = (PbxDual_cmd_setTimingReset)GetProcAddress(hdll, "bxDual_cmd_setTimingReset");
-
+	bxDual_set_packetLen = (PbxDual_set_packetLen)GetProcAddress(hdll, "bxDual_set_packetLen");
 	//BX-E
 
 	hBX_EDll = ::LoadLibrary("BxEDLL.dll");
@@ -128,7 +128,7 @@ BOOL Onbon::PublishPrograms(CString strIP, CString strPort, CString strLedType, 
 		ret = bxDual_cmd_tcpPing(ip, port, &retdata);
 		if (ret != 0)
 		{
-			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[bxDual_cmd_tcpPing]--通过TCP方式获取到控制器相关属性和IP地址失败！[%s]-[%d]", ip, port);
+			LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[bxDual_cmd_tcpPing]--通过TCP方式获取到控制器相关属性和IP地址失败！[%s]-[%d]", ip, port);
 			return FALSE;
 		}
 		else
@@ -139,67 +139,166 @@ BOOL Onbon::PublishPrograms(CString strIP, CString strPort, CString strLedType, 
 			else if (retdata.Color == 3) { cmb_ping_Color = 2; }
 			else if (retdata.Color == 7) { cmb_ping_Color = 3; }
 			else { cmb_ping_Color = 4; }
-			LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[bxDual_program_setScreenParams_G56]--[%d],[%d]", (E_ScreenColor_G56)cmb_ping_Color, retdata.ControllerType);
-			ret = bxDual_program_setScreenParams_G56((E_ScreenColor_G56)cmb_ping_Color, retdata.ControllerType, eDOUBLE_COLOR_PIXTYPE_1);
-			if (ret != 0)
+			LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[bxDual_program_setScreenParams_G56]--[%d],[%d]", (E_ScreenColor_G56)cmb_ping_Color, retdata.ControllerType);
+			//ret = bxDual_program_setScreenParams_G56((E_ScreenColor_G56)cmb_ping_Color, retdata.ControllerType, eDOUBLE_COLOR_PIXTYPE_1);
+			/*
+			1 单色屏 用2发不影响
+			2 双色屏，R+G
+			但你设置的是G+R，即在厂家工具里设置成GR。
+			本来color=1是红色，会变成绿色
+			*/
+			try
 			{
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[bxDual_program_setScreenParams_G56]--设置屏相关属性失败");
-				return FALSE;
-			}
-			if (strDeviceModel == "BX-5")
-			{
+				ret = bxDual_program_setScreenParams_G56((E_ScreenColor_G56)cmb_ping_Color, retdata.ControllerType, eDOUBLE_COLOR_PIXTYPE_2);
+				LOG_DD(LOGTYPE_DEBUG, STEPLOG, "%d",ret);
 
-				IsSUccess = addProgram_G5();
-				if (IsSUccess == FALSE)
+				if (ret != 0)
 				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[addProgram_G5]--添加屏幕节目失败");
+					LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[bxDual_program_setScreenParams_G56]--设置屏相关属性失败");
 					return FALSE;
 				}
-				IsSUccess = addArea_G5(0, 0, 0, 0, nWidth, nHieght);
-				if (IsSUccess == FALSE)
+				if (strDeviceModel == "BX-5")
 				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[addArea_G5]--添加屏幕区域失败");
-					return FALSE;
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "BX-5");
+					//设置控制各种通讯方式每一包最大长度
+					bxDual_set_packetLen(1024);
+
+					int nStunt5 = 4;
+					if (nEffect == 1)   //立即显示
+					{
+						nStunt5 = 1;
+					}
+					else if (nEffect == 2)   //左移
+					{
+						nStunt5 = 4;
+					}
+					else if (nEffect == 3)   //下移
+					{
+						nStunt5 = 32;
+					}
+					else if (nEffect == 4)    //右移
+					{
+						nStunt5 = 18;
+					}
+					else if (nEffect == 5)    //上移
+					{
+						nStunt5 = 0x06;
+					}
+					else
+					{
+						nStunt5 = 4;
+					}
+
+					IsSUccess = addProgram_G5();
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "1-%d", IsSUccess);
+
+					if (IsSUccess == FALSE)
+					{
+						LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[addProgram_G5]--添加屏幕节目失败");
+						return FALSE;
+					}
+					IsSUccess = addArea_G5(0, 0, 0, 0, nWidth, nHieght);
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "2-%d", IsSUccess);
+
+					if (IsSUccess == FALSE)
+					{
+						LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[addArea_G5]--添加屏幕区域失败");
+						return FALSE;
+					}
+
+					IsSUccess = addAreaPicture_G5(0, (unsigned char*)strPrgm.GetBuffer(0), nFontSize, nPlaySpeed, nStunt5);
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "3-%d", IsSUccess);
+
+					if (IsSUccess == FALSE)
+					{
+						LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[addAreaPicture_G5]--添加文本失败");
+						return FALSE;
+					}
+					IsSUccess = tcp_send_program_G5(ip, port);
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "4-%d", IsSUccess);
+
+					if (IsSUccess == FALSE)
+					{
+						LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[tcp_send_program_G5]--发送节目失败");
+						return FALSE;
+					}
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "----------------------------\n" );
+
 				}
-				IsSUccess = addAreaPicture_G5(0, (unsigned char*)strPrgm.GetBuffer(0), nFontSize, nPlaySpeed);
-				if (IsSUccess == FALSE)
+				else
 				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[addAreaPicture_G5]--添加文本失败");
-					return FALSE;
-				}
-				IsSUccess = tcp_send_program_G5(ip, port);
-				if (IsSUccess == FALSE)
-				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[tcp_send_program_G5]--发送节目失败");
-					return FALSE;
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "BX-6");
+
+					Ouint8 nStunt6 = 0x04;
+// 					if (nEffect == 1)   //立即显示
+// 					{
+// 						nStunt6 = 0x01;
+// 					}
+// 					else if (nEffect == 2)   //左移
+// 					{
+// 						nStunt6 = 0x04;
+// 					}
+// 					else if (nEffect == 3)   //下移
+// 					{
+// 						nStunt6 = 0x28;
+// 					}
+// 					else if (nEffect == 4)    //右移
+// 					{
+// 						nStunt6 = 0x26;
+// 					}
+// 					else if (nEffect == 5)    //上移
+// 					{
+// 						nStunt6 = 0x06;
+// 					}
+// 					else
+// 					{
+// 						nStunt6 = 0x04;
+// 					}
+					//设置控制各种通讯方式每一包最大长度
+					//bxDual_set_packetLen(63 * 1024);
+
+					IsSUccess = addProgram_G6();
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "1-%d", IsSUccess);
+
+					if (IsSUccess == FALSE)
+					{
+						LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[addProgram_G6]--添加屏幕节目失败");
+						return FALSE;
+					}
+					IsSUccess = addArea_G6(0, 0, 0, 0, nWidth, nHieght);
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "2-%d", IsSUccess);
+
+					if (IsSUccess == FALSE)
+					{
+						LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[addArea_G6]--添加屏幕区域失败");
+						return FALSE;
+					}
+					IsSUccess = addAreaPicture_G6(0, (unsigned char*)strPrgm.GetBuffer(0), nFontSize, nPlaySpeed, nStunt6);
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "3-%d", IsSUccess);
+
+					if (IsSUccess == FALSE)
+					{
+						LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[addAreaPicture_G6]--添加文本失败");
+						return FALSE;
+					}
+					IsSUccess = tcp_send_program_G6(ip, port);
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "4-%d", IsSUccess);
+
+					if (IsSUccess == FALSE)
+					{
+						LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[tcp_send_program_G6]--发送节目失败");
+						return FALSE;
+					}
+					LOG_DD(LOGTYPE_DEBUG, STEPLOG, "----------------------------\n");
+
 				}
 			}
-			else
+			catch (const std::exception&e)
 			{
-				IsSUccess = addProgram_G6();
-				if (IsSUccess == FALSE)
-				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[addProgram_G6]--添加屏幕节目失败");
-					return FALSE;
-				}
-				IsSUccess = addArea_G6(0, 0, 0, 0, nWidth, nHieght);
-				if (IsSUccess == FALSE)
-				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[addArea_G6]--添加屏幕区域失败");
-					return FALSE;
-				}
-				IsSUccess = addAreaPicture_G6(0, (unsigned char*)strPrgm.GetBuffer(0), nFontSize, nPlaySpeed);
-				if (IsSUccess == FALSE)
-				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[addAreaPicture_G6]--添加文本失败");
-					return FALSE;
-				}
-				IsSUccess = tcp_send_program_G6(ip, port);
-				if (IsSUccess == FALSE)
-				{
-					LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[tcp_send_program_G6]--发送节目失败");
-					return FALSE;
-				}
+				CString m_strLastErr;
+				m_strLastErr.Format("配置加载失败：%s", e.what());
+				LOG_DD(LOGTYPE_DEBUG, RESTARTLOG, "%s", m_strLastErr);
+				return FALSE;
 			}
 		}
 	}
@@ -284,7 +383,7 @@ BOOL Onbon::PublishPrograms(CString strIP, CString strPort, CString strLedType, 
 				1, 0, 0, nWidth, nHieght, Frame, nStunt5e, 0, nPlaySpeed,0, 0, oFont, (Ouint8*)"宋体", (unsigned char*)strPrgm.GetBuffer(0));
 			if (err != 0)
 			{
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[PublishPrograms]--bxDual_dynamicArea_AddAreaWithTxt_5G单色屏发送节目失败");
+				LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[PublishPrograms]--bxDual_dynamicArea_AddAreaWithTxt_5G单色屏发送节目失败");
 				return FALSE;
 			}
 		}
@@ -294,7 +393,7 @@ BOOL Onbon::PublishPrograms(CString strIP, CString strPort, CString strLedType, 
 				1, 0, 0, nWidth, nHieght, Frame, nStunt5e, 0, nPlaySpeed, 0, 0, oFont, (Ouint8*)"宋体", (unsigned char*)strPrgm.GetBuffer(0));
 			if (err != 0)
 			{
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[PublishPrograms]--bxDual_dynamicArea_AddAreaWithTxt_5G双色屏发送节目失败");
+				LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[PublishPrograms]--bxDual_dynamicArea_AddAreaWithTxt_5G双色屏发送节目失败");
 				return FALSE;
 			}
 		}
@@ -375,7 +474,7 @@ BOOL Onbon::PublishPrograms(CString strIP, CString strPort, CString strLedType, 
 			err = bxDual_dynamicAreaS_AddTxtDetails_6G(ip6e, port6e, eSCREEN_COLOR_SINGLE, 1, arrParams);
 			if (err != 0)
 			{
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[bxDual_dynamicAreaS_AddTxtDetails_6G]--单色屏发送节目失败");
+				LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[bxDual_dynamicAreaS_AddTxtDetails_6G]--单色屏发送节目失败");
 				return FALSE;
 			}
 		}
@@ -385,7 +484,7 @@ BOOL Onbon::PublishPrograms(CString strIP, CString strPort, CString strLedType, 
 			err = bxDual_dynamicAreaS_AddTxtDetails_6G(ip6e, port6e, eSCREEN_COLOR_DOUBLE, 1, arrParams);
 			if (err != 0)
 			{
-				LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[bxDual_dynamicAreaS_AddTxtDetails_6G]--双色屏发送节目失败");
+				LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[bxDual_dynamicAreaS_AddTxtDetails_6G]--双色屏发送节目失败");
 				return FALSE;
 			}
 		}
@@ -518,12 +617,12 @@ BOOL Onbon::PublishPrograms(CString strIP, CString strPort, CString strLedType, 
 		//{
 		//	return FALSE;
 		//}
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[PublishPrograms]--BX-E类型板卡暂不支持");
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[PublishPrograms]--BX-E类型板卡暂不支持");
 		return FALSE;
 	}
 	else
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[PublishPrograms]--仰邦板卡类型匹配失败");
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[PublishPrograms]--仰邦板卡类型匹配失败");
 		return FALSE;
 	}
 	return TRUE;
@@ -632,12 +731,12 @@ BOOL Onbon::addArea_G6(Ouint16 AreaID, Ouint8 AreaType, Ouint16 AreaX, Ouint16 A
 	return TRUE;
 }
 //添加文本
-BOOL Onbon::addAreaPicture_G5(Ouint16 AreaID, Ouint8 str[], int nFontSize, int nPlaySpeed)
+BOOL Onbon::addAreaPicture_G5(Ouint16 AreaID, Ouint8 str[], int nFontSize, int nPlaySpeed, Ouint8 neffect)
 {
 	int n_ret = 0;
 	EQpageHeader pheader;
 	pheader.PageStyle = 0x00;
-	pheader.DisplayMode = 0x04;
+	pheader.DisplayMode = /*0x04*/neffect;
 	pheader.ClearMode = 0x01;
 	pheader.Speed =(10-nPlaySpeed)*6+1;
 	pheader.StayTime = 0;
@@ -645,11 +744,15 @@ BOOL Onbon::addAreaPicture_G5(Ouint16 AreaID, Ouint8 str[], int nFontSize, int n
 	pheader.ValidLen = 0;
 	pheader.arrMode = eSINGLELINE;
 	pheader.fontSize = nFontSize;
+	//pheader.fontSize = 12;
 	pheader.color = eRED;
 	pheader.fontBold = false;
 	pheader.fontItalic = false;
 	pheader.tdirection = pNORMAL;
 	pheader.txtSpace = 0;
+
+	pheader.Valign = 2;
+	pheader.Halign = 2;
 	n_ret = bxDual_program_picturesAreaAddTxt(0, str, (Ouint8*)"宋体", &pheader);
 	if (n_ret != 0)
 	{
@@ -658,12 +761,12 @@ BOOL Onbon::addAreaPicture_G5(Ouint16 AreaID, Ouint8 str[], int nFontSize, int n
 	return TRUE;
 }
 
-BOOL Onbon::addAreaPicture_G6(Ouint16 AreaID, Ouint8 str[], int nFontSize, int nPlaySpeed)
+BOOL Onbon::addAreaPicture_G6(Ouint16 AreaID, Ouint8 str[], int nFontSize, int nPlaySpeed , Ouint8 neffect)
 {
 	int n_ret = 0;
 	EQpageHeader_G6 pheader1;
 	pheader1.PageStyle = 0x00;
-	pheader1.DisplayMode = 0x04;
+	pheader1.DisplayMode = 0x04/*neffect*/;
 	pheader1.ClearMode = 0x01;
 	pheader1.Speed = (10 - nPlaySpeed) * 6 + 1;;
 	pheader1.StayTime = 0;
@@ -730,35 +833,35 @@ BOOL Onbon::tcp_send_program_G6(Ouint8* ip, Ouint16 port)
 	ret = bxDual_program_IntegrateProgramFile_G6(&program);
 	if (ret != 0)
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[tcp_send_program_G6]--bxDual_program_IntegrateProgramFile_G6 run error...");
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[tcp_send_program_G6]--bxDual_program_IntegrateProgramFile_G6 run error...");
 		return FALSE;
 	}
 
 	ret = bxDual_cmd_ofsStartFileTransf(ip, port);
 	if (ret != 0) 
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[tcp_send_program_G6]--cmd_ofsStartFileTransf run error...");
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[tcp_send_program_G6]--cmd_ofsStartFileTransf run error...");
 		return FALSE;
 	}
 
 	ret = bxDual_cmd_ofsWriteFile(ip, port, program.dfileName, program.dfileType, program.dfileLen, 1, program.dfileAddre);
 	if (ret != 0) 
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[bxDual_cmd_ofsWriteFile]--cmd_ofsWriteFile run error...");
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[bxDual_cmd_ofsWriteFile]--cmd_ofsWriteFile run error...");
 		return FALSE;
 	}
 
 	ret = bxDual_cmd_ofsWriteFile(ip, port, program.fileName, program.fileType, program.fileLen, 1, program.fileAddre);
 	if (ret != 0) 
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[bxDual_cmd_ofsWriteFile]--cmd_ofsWriteFile run error...");
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[bxDual_cmd_ofsWriteFile]--cmd_ofsWriteFile run error...");
 		return FALSE;
 	}
 
 	ret = bxDual_cmd_ofsEndFileTransf(ip, port);
 	if (ret != 0) 
 	{
-		LOG_DD(LOGTYPE_DEBUG, PUBLISHRECOARD, "[bxDual_cmd_ofsWriteFile]--cmd_ofsEndFileTransf run error...");
+		LOG_DD(LOGTYPE_DEBUG, TIPSLOG, "[bxDual_cmd_ofsWriteFile]--cmd_ofsEndFileTransf run error...");
 		return FALSE;
 	}
 

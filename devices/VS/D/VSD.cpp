@@ -256,12 +256,19 @@ int VSD::LED_VSDSendPrgm(CString strIP,CString strPort, CString strLedType,long 
 		K = MakeRoot(VSD_ROOT_DOWNLOAD, VSD_COLOR_MODE_DOUBLE, VSD_ROOT_SURVIVE_ALWAYS);
 	}
 	AddChapter(K, 24*60*60*1000, WAIT_CHILD);
+
+// 	AddRegion(K, 0, 0, 1184, 48, 0);
+// 	//第1页面
+// 	AddLeaf(K, 10000, WAIT_CHILD);
+// 	//自动换行的文字
+// 	AddText(K, 0, 0, 1184, 48, VSD_V_TRUE, 0, "欢迎光临邮储银行！社会主义核心价值观：富强、民主、文明、和谐；自由、平等、公正、法治；爱国、敬业、诚信、友善。", "宋体", 32, RGB(255, 255, 0), VSD_WFS_NONE, VSD_V_FALSE, 0, 1, 1, 2, 1, 0, 1, 3);
 	AddRegion(K, 0, 0, nWidth, nHeight, 0);
 
 	//第1页面
 	AddLeaf(K, 24*60*60*1000, WAIT_CHILD);
 	//非自动换行的文字
-	AddText(K,0,0,nWidth,nHeight,VSD_V_TRUE,0,(char*)strPrgm.GetBuffer(0),"宋体",atoi(strPrgmFontSize),RGB(255,0,0),VSD_WFS_NONE,VSD_V_FALSE,0,Effect,nPlaySpeed,1, nPlaySpeed,0, nPlaySpeed,0);
+	//AddText(K, 0, 0, nWidth, nHeight, VSD_V_TRUE, 0, (char*)strPrgm.GetBuffer(0), "宋体", atoi(strPrgmFontSize), RGB(255, 0, 0), VSD_WFS_NONE, VSD_V_FALSE, 0, Effect, nPlaySpeed, 1, nPlaySpeed, 0, nPlaySpeed, 0);
+	AddText(K,0,0,nWidth,nHeight,VSD_V_TRUE,0,(char*)strPrgm.GetBuffer(0),"宋体",atoi(strPrgmFontSize),RGB(255,255,0),VSD_WFS_NONE,VSD_V_FALSE,0,Effect,nPlaySpeed,1, nPlaySpeed,0, nPlaySpeed,0);
 	R=LED_SendToScreen(&param, K);
 	if (R>=0)
 	{

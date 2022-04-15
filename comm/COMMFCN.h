@@ -19,11 +19,14 @@
 #define LOG_DD Automatic_log
 #define LOG_LEVEL Automatic_level
 
-#define SERVERLOG "LedCtrlServer.log"
+//#define SERVERLOG "LedCtrlServer.log"
 #define TRADELOG "LedTrade.log"
-#define RMQLOG "LedRMQ.log"
+#define LEDRMQLOG "LedRMQ.log"
+#define SERVEROFFLINE "ServerOffline.log"
 #define PUBLISHRECOARD "PublishRecoard.log"
 #define TIPSLOG "Tips.log"
+#define RESTARTLOG "Restart.log"
+#define STEPLOG "step.log"
 /************************************************************************/
 /*                              ³£    Á¿                                */
 /************************************************************************/

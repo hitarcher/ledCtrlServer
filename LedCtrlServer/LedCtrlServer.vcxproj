@@ -78,6 +78,7 @@
     <OutDir>../bin/</OutDir>
     <IncludePath>$(SolutionDir)devices\BX\BX5\;$(SolutionDir)LedCtrlServer\;$(SolutionDir)devices\CL\cl3000\;$(SolutionDir)devices\EQ\eq2008\;$(SolutionDir)trade\;$(SolutionDir)http\;$(SolutionDir)include\;$(SolutionDir)comm\;$(SolutionDir)Config\;$(SolutionDir)json\;$(SolutionDir)devices\VS\A;$(SolutionDir)devices\VS\D;$(SolutionDir)des-3\;$(SolutionDir)devices\CL\SCL2008\;./;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\;./;$(LibraryPath)</LibraryPath>
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -202,7 +203,11 @@
     <ClInclude Include="..\comm\MsgConfig.h" />
     <ClInclude Include="..\Config\Config.h" />
     <ClInclude Include="..\des-3\CommunicateInterface.h" />
+    <ClInclude Include="..\devices\BX\BX5\bx_dual_sdk.h" />
+    <ClInclude Include="..\devices\BX\BX5\bx_sdk_dual.h" />
+    <ClInclude Include="..\devices\BX\BX5\bx_server_sdk.h" />
     <ClInclude Include="..\devices\BX\BX5\Obasic_types.h" />
+    <ClInclude Include="..\devices\BX\BX5\Obasic_types1.h" />
     <ClInclude Include="..\devices\BX\BX5\Onbon.h" />
     <ClInclude Include="..\devices\CL\cl3000\MiniLED.h" />
     <ClInclude Include="..\devices\EQ\eq2008\EQ2008_DataStruct.h" />

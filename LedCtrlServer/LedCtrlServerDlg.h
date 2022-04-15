@@ -46,6 +46,8 @@ protected:
 public:
 	CListBox Tips;   //界面提示框变量
 	CTrade m_toolTrade;
+	CListCtrl m_list_queue;
+	void CLedCtrlServerDlg::InitQueueList();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
 	void DealPublicPrgm(CString strJson, CString strUrl, CString strUser, CString strTime, CString strID);//处理发布节目
@@ -91,6 +93,11 @@ public:
 	int     m_iCardNum;
 	int     m_iProgramIndex;
 	// 实现
+
+	std::timed_mutex EQ_mutex_streamthread;
+	std::timed_mutex VSA_mutex_streamthread;
+	std::timed_mutex BX_mutex_streamthread;
+
 
 public:
 	void tips(CString tips);
@@ -197,8 +204,5 @@ protected:
 #endif
 	typedef BOOL(LIBRARY_MODE *_MC_PicToXMPXFile)(int colortype, int width, int height, BOOL bstretch, char* Pictfilename, char* XMPfilename);
 	_MC_PicToXMPXFile	  MC_PicToXMPXFile;
-public:
-	CListCtrl m_list_queue;
-	void CLedCtrlServerDlg::InitQueueList();
 
 };

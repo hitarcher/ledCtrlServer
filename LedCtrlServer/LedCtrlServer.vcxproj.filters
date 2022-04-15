@@ -237,6 +237,18 @@
     <ClInclude Include="..\include\mythreadpool.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\devices\BX\BX5\bx_dual_sdk.h">
+      <Filter>devices\仰邦\BX-5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\BX\BX5\bx_sdk_dual.h">
+      <Filter>devices\仰邦\BX-5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\BX\BX5\bx_server_sdk.h">
+      <Filter>devices\仰邦\BX-5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\devices\BX\BX5\Obasic_types1.h">
+      <Filter>devices\仰邦\BX-5</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LedCtrlServer.cpp">
