@@ -1550,7 +1550,7 @@ Thread:
 // 			atoi(strPrgmFontSize), atoi(strPrgmEffect), atoi(strPrgmPlaySpeed), atoi(strPrgmStayTime));
 		BX_mutex_streamthread.lock();
 		IsSuccess = onbon.PublishPrograms(strIP, strPort, strLedType, strDeviceModel, strPrgmContent, atoi(strWidth), atoi(strHeight),
-			atoi(strHeight)*3/4, atoi(strPrgmEffect), atoi(strPrgmPlaySpeed), atoi(strPrgmStayTime));
+			/*atoi(strHeight)*3/4*/atoi(strPrgmFontSize), atoi(strPrgmEffect), atoi(strPrgmPlaySpeed), atoi(strPrgmStayTime));
 		BX_mutex_streamthread.unlock();
 		end = clock();
 		double endtime = (double)(end - start) / CLOCKS_PER_SEC;
