@@ -439,7 +439,7 @@ BOOL Onbon::PublishPrograms(CString strIP, CString strPort, CString strLedType, 
 		stPageHeader.PageStyle = 0x00;
 		stPageHeader.DisplayMode = 0x04;
 		stPageHeader.ClearMode = 0x00;
-		stPageHeader.Speed = nPlaySpeed = (10 - nPlaySpeed) * 6 + 1;;
+		stPageHeader.Speed = (10 - nPlaySpeed) * 6 + 1;;
 		stPageHeader.StayTime = 0;
 		stPageHeader.RepeatTime = 1;
 		stPageHeader.ValidLen = oAreaHeader_G6.AreaWidth;
